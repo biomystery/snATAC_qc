@@ -8,6 +8,27 @@ import operator
 import os.path
 import optparse
 
+def min_dist(s, sl):
+    """ return the string with min edit distance """
+    ss = sl[:]
+    if len(s) == 0: sys.exit("error(min_dist): inquiry string has length 0")
+    if len(ss) == 0: sys.exit("error(min_dist): inquiry string list has 0 elements")
+    if ([len(s) == len(sj) for sj in ss].count(False) > 0): sys.exit("error(min_dist): different string length")
+    dists = [[a == b for (a,b) in zip(s, sj)].count(False) for sj in ss]
+    min_value = min(dists)
+    min_index = dists.index(min(dists))
+    min_s = ss[min_index]
+
+    # find the 2nd min element in the list
+    del dists[min_index]
+    del ss[min_index]
+
+    min_value2 = min(dists)
+    min_index2 = dists.index(min(dists))
+    min_s2 = ss[min_index2]
+    return (min_s, min_value, min_s2, min_value2)
+
+
 def main():
     """ main function """
     parser = optparse.OptionParser(usage='%prog [-h] [-a I1.fastq] [-b I2.fastq] [-c R1.fastq] [-d R2.fastq]',
