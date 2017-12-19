@@ -28,6 +28,21 @@ def min_dist(s, sl):
     min_s2 = ss[min_index2]
     return (min_s, min_value, min_s2, min_value2)
 
+def correct_single_barcode(b_in, b_lib):
+    """ correct single barcode b_in based on b_lib """
+    return b_out
+
+def correct_barcodes(r7,i7,i5,r5,fout_list):
+    """
+    correct all the barcode for current read and determine which sample this read belongs to (fout)
+    fout_list: a list of sample file object (s1_r1.fastq) 
+
+    eg:  cur_r7_c,cur_i7_c,cur_i5_c,cur_r5_c,fout_r1,fout_r2 = correct_barcodes(cur_r7,cur_i7,cur_i5,cur_r5,sample_file_list)
+    """
+    
+    
+    return r7_c, i7_c, i5_c, r5_c, fout  
+
 
 def main():
     """ main function """
@@ -139,26 +154,31 @@ def main():
         cur_r7 = cur_i1_read[:8]
         cur_i7 = cur_i1_read[-8:]
         cur_i5 = cur_i2_read[:8]
-        cur_r5 = cur_i2_read[-8:]        
+        cur_r5 = cur_i2_read[-8:]
+
+        # correct barcode & get sample id for this barcode 
+        cur_r7_c,cur_i7_c,cur_i5_c,cur_r5_c,fout_r1,fout_r2 = correct_barcodes(cur_r7,cur_i7,cur_i5,cur_r5)
         
-        cur_barcode = cur_r7 + cur_i7 + cur_i5 + cur_r5
+        
+        # concorate barcodes
+        cur_barcode = cur_r7_c + cur_i7_c + cur_i5_c + cur_r5_c
         if cur_barcode.count('N') >= 12: continue
 
-        try:
-            print '@' + cur_barcode + ':' + cur_r1_name
-            print cur_r1_read
-            print '+'
-            print cur_r1_qual
-        except IOError:
-            try:
-                sys.stdout.close()
-            except IOError:
-                pass
-            try:
-                sys.stderr.close()
-            except IOError:
-                pass
-                
+        # demultiplex r1 & r2 (split to sample1_R1.fastq.gz, sample2_R1.fastq.gz, undetermined_R1.fastq.gz, undetermined_R2.fastq.gz)
+        fout_r1.write('@' + cur_barcode + ':' + cur_r1_name +"\n")
+        fout_r2.write('@' + cur_barcode + ':' + cur_r2_name +"\n")
+        
+        fout_r1.write( cur_r1_read+ "\n")
+        fout_r2.write( cur_r2_read+ "\n")
+        
+        fout_r1.write( '+' + "\n")
+        fout_r2.write( '+' + "\n")
+
+        fout_r1.write( cur_r1_qual + "\n")
+        fout_r2.write( cur_r1_qual + "\n")         
+
+
+    # close all files
     fi1.close()
     fi2.close()
     fr1.close()
