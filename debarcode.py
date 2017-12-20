@@ -32,6 +32,8 @@ def correct_single_barcode(b_in, b_lib):
     """ correct single barcode b_in based on b_lib """
     return b_out
 
+
+
 def correct_barcodes(r7,i7,i5,r5,fout_list):
     """
     correct all the barcode for current read and determine which sample this read belongs to (fout)
@@ -43,6 +45,9 @@ def correct_barcodes(r7,i7,i5,r5,fout_list):
     
     return r7_c, i7_c, i5_c, r5_c, fout  
 
+def check_barcode(barcode_file):
+    """check barcdes on the barcode file"""
+    return 
 
 def main():
     """ main function """
@@ -68,11 +73,24 @@ def main():
                       help='R2.fastq.gz'
                       )
 
+    parser.add_option('-x','--xmismatch',
+                      dest="xmismatch", 
+                      type=int,
+                      help='max allowed mismatch.'
+                      )
+
+    parser.add_option('-l','--barcode',
+                      dest="barcodes", 
+                      help='a single barcode library text file.'
+                      )
+
     parser.add_option('--version',
                       dest="version",
                       default=1.0,
                       type="float",
                       )
+
+    
 
     if len(sys.argv) < 8:
         parser.print_help()
@@ -84,11 +102,15 @@ def main():
     fi2_name = args.I2
     fr1_name = args.R1
     fr2_name = args.R2
+    max_mm = int(args.xmismatch)
+    fb_name = args.barcodes
+    
     
     if not os.path.isfile(fi1_name): exit("error: \'%s\' not exist" % fi1_name)
     if not os.path.isfile(fi2_name): exit("error: \'%s\' not exist" % fi2_name)
     if not os.path.isfile(fr1_name): exit("error: \'%s\' not exist" % fr1_name)
     if not os.path.isfile(fr2_name): exit("error: \'%s\' not exist" % fr2_name)
+    if not os.path.isfile(fb_name): exit("error: \'%s\' not exist" % fb_name)
     
     # check file format
     if fi1_name.endswith('.gz'):
@@ -126,7 +148,11 @@ def main():
         fr2 = open(fr2_name, 'r')
     elif fr2_name.endswith('.fq'):
         fr2 = open(fr2_name, 'r')
-    
+
+    # check barcode list
+    barcode_dic = check_barcode(fb_name)
+
+        
     while True:
         cur_i1_name = fi1.readline().strip()[1:]
         cur_i1_read = fi1.readline().strip()
