@@ -59,7 +59,7 @@ def check_barcode(barcode_file):
     
     with open(barcode_file, "r") as fin:
         samples = fin.readline().split() # first line define samples
-        l = [row.strip("\n").split("\t") for row in f.readlines()] # keep empty , and 2d list
+        l = [row.strip("\n").split("\t") for row in fin.readlines()] # keep empty , and 2d list
 
     barcode_len =[]
     for s in samples:
