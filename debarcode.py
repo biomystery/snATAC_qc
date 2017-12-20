@@ -74,7 +74,7 @@ def check_barcode(barcode_file):
     return barcode_dic
 
 def check_input_file(input_f):
-    
+    """check input file and return file handle"""
     if not os.path.isfile(input_f): exit("error: \'%s\' not exist" % fi1_name)
 
     # check file type & open file
@@ -88,6 +88,15 @@ def check_input_file(input_f):
         fi1 = open(fi1_name, 'r')
 
     return fi1
+
+def parse_fastq(f):
+    """parse every 4 lines of fastq file opened with f handle"""
+    name = fi1.readline().strip()[1:]
+    read = fi1.readline().strip()
+    plus = fi1.readline().strip()
+    qual = fi1.readline().strip()
+
+    return [name,read,plus,qual]
     
 
 def main():
@@ -152,54 +161,37 @@ def main():
     outfiles_dic["unknown"]={"R1":open("undetermined_R1.fastq","w"),"R2":open("undetermined_R2.fastq","w")}
         
     while True:
-        cur_i1_name = fi1.readline().strip()[1:]
-        cur_i1_read = fi1.readline().strip()
-        cur_i1_plus = fi1.readline().strip()
-        cur_i1_qual = fi1.readline().strip()
-    
-        cur_i2_name = fi2.readline().strip()[1:]
-        cur_i2_read = fi2.readline().strip()
-        cur_i2_plus = fi2.readline().strip()
-        cur_i2_qual = fi2.readline().strip()
-    
-        cur_r1_name = fr1.readline().strip()[1:]
-        cur_r1_read = fr1.readline().strip()
-        cur_r1_plus = fr1.readline().strip()
-        cur_r1_qual = fr1.readline().strip()
 
-        cur_r2_name = fr2.readline().strip()[1:]
-        cur_r2_read = fr2.readline().strip()
-        cur_r2_plus = fr2.readline().strip()
-        cur_r2_qual = fr2.readline().strip()
-        
+        cur = {k:parse_fastq(f)  for k,f in inputfiles_dic.iteriterms()}
+
         if cur_i1_name == "" or cur_i2_name == "" or cur_r1_name == "" or cur_r2_name == "": break        
         if not (cur_i1_name.split()[0] == cur_i2_name.split()[0] == cur_r1_name.split()[0] == cur_r2_name.split()[0]): sys.exit("error(main): read name not matched")        
 
-        cur_r7 = cur_i1_read[:8]
-        cur_i7 = cur_i1_read[-8:]
-        cur_i5 = cur_i2_read[:8]
-        cur_r5 = cur_i2_read[-8:]
+        cur_barcode_dic = {"r7":cur_i1_read[:8],"i7":cur_i1_read[-8:],"i5": cur_i2_read[:8],"r5": cur_i2_read[-8:]}
 
         # correct barcode & get sample id for this barcode 
-        cur_r7_c,cur_i7_c,cur_i5_c,cur_r5_c,fout_r1,fout_r2 = correct_barcodes(cur_r7,cur_i7,cur_i5,cur_r5)
+        cur_barcode_c,out_id = correct_barcodes(cur_barcode)
         
         
         # concorate barcodes
-        cur_barcode = cur_r7_c + cur_i7_c + cur_i5_c + cur_r5_c
+        cur_barcode = cur_barcode_c["r7"] + cur_barcode_c["i7"] + cur_barcode_c["i5"] +cur_barcode_c["r5"]
+
         if cur_barcode.count('N') >= 12: continue
 
         # demultiplex r1 & r2 (split to sample1_R1.fastq.gz, sample2_R1.fastq.gz, undetermined_R1.fastq.gz, undetermined_R2.fastq.gz)
-        fout_r1.write('@' + cur_barcode + ':' + cur_r1_name +"\n")
-        fout_r2.write('@' + cur_barcode + ':' + cur_r2_name +"\n")
-        
-        fout_r1.write( cur_r1_read+ "\n")
-        fout_r2.write( cur_r2_read+ "\n")
-        
-        fout_r1.write( '+' + "\n")
-        fout_r2.write( '+' + "\n")
+        # write to output files
+        outfiles_dic[out_id]["R1"].write('@' + cur_barcode + ':' + cur_r1_name +"\n")
+        outfiles_dic[out_id]["R2"].write('@' + cur_barcode + ':' + cur_r2_name +"\n")        
 
-        fout_r1.write( cur_r1_qual + "\n")
-        fout_r2.write( cur_r1_qual + "\n")         
+        
+        outfiles.dic[out_id]["R1"].write( cur_r1_read+ "\n")
+        outfiles_dic[out_id]["R2"].write( cur_r2_read+ "\n")
+        
+        outfiles_dic[out_id]["R1"].write( '+' + "\n")
+        outfiles_dic[out_id]["R2"].write( '+' + "\n")
+
+        outfiles_dic[out_id]["R1"].write( cur_r1_qual + "\n")
+        outfiles_dic[out_id]["R2"].write( cur_r1_qual + "\n")         
 
 
     # close all files
