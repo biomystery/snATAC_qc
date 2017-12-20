@@ -73,6 +73,23 @@ def check_barcode(barcode_file):
 
     return barcode_dic
 
+def check_input_file(input_f):
+    
+    if not os.path.isfile(input_f): exit("error: \'%s\' not exist" % fi1_name)
+
+    # check file type & open file
+    if fi1_name.endswith('.gz'):
+        fi1 = gzip.open(fi1_name, 'rb')
+    elif fi1_name.endswith('.bz2'):
+        fi1 = bz2.BZ2File(fi1_name, 'r')
+    elif fi1_name.endswith('.fastq'):
+        fi1 = open(fi1_name, 'r')
+    elif fi1_name.endswith('.fq'):
+        fi1 = open(fi1_name, 'r')
+
+    return fi1
+    
+
 def main():
     """ main function """
     parser = optparse.OptionParser(usage='%prog [-h] [-a I1.fastq] [-b I2.fastq] [-c R1.fastq] [-d R2.fastq]',
@@ -124,56 +141,15 @@ def main():
     max_mm = int(args.xmismatch)
     fb_name = args.barcodes
     
-    
-    if not os.path.isfile(fi1_name): exit("error: \'%s\' not exist" % fi1_name)
-    if not os.path.isfile(fi2_name): exit("error: \'%s\' not exist" % fi2_name)
-    if not os.path.isfile(fr1_name): exit("error: \'%s\' not exist" % fr1_name)
-    if not os.path.isfile(fr2_name): exit("error: \'%s\' not exist" % fr2_name)
-    if not os.path.isfile(fb_name): exit("error: \'%s\' not exist" % fb_name)
-    
-    # check file format
-    if fi1_name.endswith('.gz'):
-        fi1 = gzip.open(fi1_name, 'rb')
-    elif fi1_name.endswith('.bz2'):
-        fi1 = bz2.BZ2File(fi1_name, 'r')
-    elif fi1_name.endswith('.fastq'):
-        fi1 = open(fi1_name, 'r')
-    elif fi1_name.endswith('.fq'):
-        fi1 = open(fi1_name, 'r')
-
-    if fi2_name.endswith('.gz'):
-        fi2 = gzip.open(fi2_name, 'rb')
-    elif fi2_name.endswith('.bz2'):
-        fi2 = bz2.BZ2File(fi2_name, 'r')
-    elif fi2_name.endswith('.fastq'):
-        fi2 = open(fi2_name, 'r')
-    elif fi2_name.endswith('.fq'):
-        fi2 = open(fi2_name, 'r')
-
-    if fr1_name.endswith('.gz'):
-        fr1 = gzip.open(fr1_name, 'rb')
-    elif fr1_name.endswith('.bz2'):
-        fr1 = bz2.BZ2File(fr1_name, 'r')
-    elif fr1_name.endswith('.fastq'):
-        fr1 = open(fr1_name, 'r')
-    elif fr1_name.endswith('.fq'):
-        fr1 = open(fr1_name, 'r')
-
-    if fr2_name.endswith('.gz'):
-        fr2 = gzip.open(fr2_name, 'rb')
-    elif fr2_name.endswith('.bz2'):
-        fr2 = bz2.BZ2File(fr2_name, 'r')
-    elif fr2_name.endswith('.fastq'):
-        fr2 = open(fr2_name, 'r')
-    elif fr2_name.endswith('.fq'):
-        fr2 = open(fr2_name, 'r')
-
     # check barcode list
     barcode_dic = check_barcode(fb_name)
+    
+    # open input files; regular dic
+    inputfiles_dic = {k:check_input_file(v) for k,v in {"I1":args.I1,"I2":args.I2,"R1":args.R1,"R2":args.R2}.iteriterms()}
 
-    # open output files
-    outfiles_dic ={k:open(k+".fastq" , "w") for k in barcode_dic.keys()}
-
+    # open output files: nested dic 
+    outfiles_dic = {k: {"R1":open(k+"_R1.fastq" , "w"), "R2":open(k+"_R2.fastq","w")} for k in barcode_dic.keys()}
+    outfiles_dic["unknown"]={"R1":open("undetermined_R1.fastq","w"),"R2":open("undetermined_R2.fastq","w")}
         
     while True:
         cur_i1_name = fi1.readline().strip()[1:]
@@ -227,11 +203,8 @@ def main():
 
 
     # close all files
-    fi1.close()
-    fi2.close()
-    fr1.close()
-    fr2.close()    
-    for f in outfiles_dic.values(): f.close()
+    for f in inputfiles_dic.values(): f.close();
+    for f in outfiles_dic.values(): f["R1"].close(); f["R2"].close()
     
 if __name__ == '__main__':
     main()
