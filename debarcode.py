@@ -74,7 +74,8 @@ def main():
                       )
 
     parser.add_option('-x','--xmismatch',
-                      dest="xmismatch", 
+                      dest="xmismatch",
+                      default = 2,
                       type=int,
                       help='max allowed mismatch.'
                       )
@@ -89,12 +90,6 @@ def main():
                       default=1.0,
                       type="float",
                       )
-
-    
-
-    if len(sys.argv) < 8:
-        parser.print_help()
-        exit('error: too few arguments')
 
     args = parser.parse_args()[0]
 
