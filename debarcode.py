@@ -171,6 +171,9 @@ def main():
     # check barcode list
     barcode_dic = check_barcode(fb_name)
 
+    # open output files
+    outfiles_dic ={k:open(k+".fastq" , "w") for k in barcode_dic.keys()}
+
         
     while True:
         cur_i1_name = fi1.readline().strip()[1:]
@@ -228,6 +231,7 @@ def main():
     fi2.close()
     fr1.close()
     fr2.close()    
-
+    for f in outfiles_dic.values(): f.close()
+    
 if __name__ == '__main__':
     main()
