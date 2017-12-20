@@ -28,22 +28,46 @@ def min_dist(s, sl):
     min_s2 = ss[min_index2]
     return (min_s, min_value, min_s2, min_value2)
 
-def correct_single_barcode(b_in, b_lib):
+def correct_single_barcode(b_in, key_in, b_lib,max_mm):
     """ correct single barcode b_in based on b_lib """
-    return b_out
 
-
-
-def correct_barcodes(r7,i7,i5,r5,barcode_dic,fout_list):
-    """
-    correct all the barcode for current read and determine which sample this read belongs to (fout)
-    fout_list: a list of sample file object (s1_r1.fastq) 
-
-    eg:  cur_r7_c,cur_i7_c,cur_i5_c,cur_r5_c,fout_r1,fout_r2 = correct_barcodes(cur_r7,cur_i7,cur_i5,cur_r5,sample_file_list)
-    """
+    all_matches = {}
+     # m,num_mm,m2,mum_mm2; for all samples, do a compare
+    all_matches = {k:{'match':min_dist(b_in, v)} for k,v in b_lib.iteritems()} #k: sample, v: barcodes
     
+    for k,v in all_matches.iteritems():
+        all_matches[k]['is_found'] = (v['match'][1] <=max_mm and abs(v['match'][3] -v['match'][0]) > 1)
+
+    if key_in in ['r5','r7']:
+        match = all_matches[all_matches.keys()[0]] # just first sample 
+        if match['is_found']:
+            return  match['match'][0],"" # return corrected 
+        else:
+            return b_in,"unknown" # not correct 
+    else:  # need to find which sample  
+        s_out  = [s for s,m in all_matches if m['is_found']]
+        if len(s_out) == 1 :
+            return all_matches[s_out]['match'][0],s_out
+        else:
+            return b_in,"unknown"
+
+
+
+def correct_barcodes(input_barcode_dic_,barcode_lib_dic_):
+    """
+    correct barcode & get sample id for this read  
+    """
+    corrected_barcode_dic={}
+    r_id_init = [] 
+
+    for k,b in input_barcode_dic_.iteritems(): 
+        b_lib_sub = {s:v[k] for s,v in barcode_lib_dic_.iteritems()}
+        b_c, r_id_ = correct_single_barcode(b,k,b_lib_sub) 
+
     
-    return r7_c, i7_c, i5_c, r5_c, fout  
+
+    
+    return corrected_barcode_dic,r_id  
 
 def check_barcode(barcode_file):
     """
@@ -142,19 +166,13 @@ def main():
                       )
 
     args = parser.parse_args()[0]
-
-    fi1_name = args.I1
-    fi2_name = args.I2
-    fr1_name = args.R1
-    fr2_name = args.R2
     max_mm = int(args.xmismatch)
-    fb_name = args.barcodes
     
     # check barcode list
-    barcode_dic = check_barcode(fb_name)
+    barcode_lib_dic = check_barcode(args.barcodes)
     
     # open input files; regular dic
-    inputfiles_dic = {k:check_input_file(v) for k,v in {"I1":args.I1,"I2":args.I2,"R1":args.R1,"R2":args.R2}.iteriterms()}
+    infiles_dic = {k:check_input_file(v) for k,v in {"I1":args.I1,"I2":args.I2,"R1":args.R1,"R2":args.R2}.iteritems()}
 
     # open output files: nested dic 
     outfiles_dic = {k: {"R1":open(k+"_R1.fastq" , "w"), "R2":open(k+"_R2.fastq","w")} for k in barcode_dic.keys()}
@@ -162,16 +180,18 @@ def main():
         
     while True:
 
-        cur = {k:parse_fastq(f)  for k,f in inputfiles_dic.iteriterms()}
+        cur_read = {k:parse_fastq(f)  for k,f in infiles_dic.iteritems()}
 
-        if cur_i1_name == "" or cur_i2_name == "" or cur_r1_name == "" or cur_r2_name == "": break        
-        if not (cur_i1_name.split()[0] == cur_i2_name.split()[0] == cur_r1_name.split()[0] == cur_r2_name.split()[0]): sys.exit("error(main): read name not matched")        
+        # check all read name 
+        cur_read_name =set([v[0].split()[0] for k,v in cur_read.iteritems()])
+        if "" in cur_read_name: break         
+        if len(cur_read_name)>1: sys.exit("error(main): read name not matched")        
 
+        # get current barcode before correction 
         cur_barcode_dic = {"r7":cur_i1_read[:8],"i7":cur_i1_read[-8:],"i5": cur_i2_read[:8],"r5": cur_i2_read[-8:]}
 
-        # correct barcode & get sample id for this barcode 
-        cur_barcode_c,out_id = correct_barcodes(cur_barcode)
-        
+        # correct barcode & get sample id for this read  
+        cur_barcode_c,read_id = correct_barcodes(cur_barcode_dic,barcode_lib_dic)
         
         # concorate barcodes
         cur_barcode = cur_barcode_c["r7"] + cur_barcode_c["i7"] + cur_barcode_c["i5"] +cur_barcode_c["r5"]
@@ -195,7 +215,7 @@ def main():
 
 
     # close all files
-    for f in inputfiles_dic.values(): f.close();
+    for f in infiles_dic.values(): f.close();
     for f in outfiles_dic.values(): f["R1"].close(); f["R2"].close()
     
 if __name__ == '__main__':
