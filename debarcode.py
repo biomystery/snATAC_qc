@@ -60,14 +60,20 @@ def correct_barcodes(input_barcode_dic_,barcode_lib_dic_):
     corrected_barcode_dic={}
     r_id_init = [] 
 
-    for k,b in input_barcode_dic_.iteritems(): 
+    for k,b in input_barcode_dic_.iteritems():
+        # k is : r7, i7, i5, r5 (order not sure)
+        
         b_lib_sub = {s:v[k] for s,v in barcode_lib_dic_.iteritems()}
-        b_c, r_id_ = correct_single_barcode(b,k,b_lib_sub) 
+        b_c, r_id_ = correct_single_barcode(b,k,b_lib_sub)
+        corrected_barcode_dic[k] = b_c
+        r_id_init.append(r_id)
 
-    
+    r_id = set(filter(None,r_id_init))
+    if len(r_id)>1 or ("unknown" in r_id):
+        return corrected_barcode_dic, "unknown"
+    else:
+        return corrected_barcode_dic, list(r_id)[0]
 
-    
-    return corrected_barcode_dic,r_id  
 
 def check_barcode(barcode_file):
     """
@@ -196,22 +202,22 @@ def main():
         # concorate barcodes
         cur_barcode = cur_barcode_c["r7"] + cur_barcode_c["i7"] + cur_barcode_c["i5"] +cur_barcode_c["r5"]
 
-        if cur_barcode.count('N') >= 12: continue
+        if cur_barcode.count('N') >= 12: read_id="unknown" 
 
         # demultiplex r1 & r2 (split to sample1_R1.fastq.gz, sample2_R1.fastq.gz, undetermined_R1.fastq.gz, undetermined_R2.fastq.gz)
         # write to output files
-        outfiles_dic[out_id]["R1"].write('@' + cur_barcode + ':' + cur_r1_name +"\n")
-        outfiles_dic[out_id]["R2"].write('@' + cur_barcode + ':' + cur_r2_name +"\n")        
+        outfiles_dic[read_id]["R1"].write('@' + cur_barcode + ':' + cur_r1_name +"\n")
+        outfiles_dic[read_id]["R2"].write('@' + cur_barcode + ':' + cur_r2_name +"\n")        
 
         
-        outfiles.dic[out_id]["R1"].write( cur_r1_read+ "\n")
-        outfiles_dic[out_id]["R2"].write( cur_r2_read+ "\n")
+        outfiles.dic[read_id]["R1"].write( cur_r1_read+ "\n")
+        outfiles_dic[read_id]["R2"].write( cur_r2_read+ "\n")
         
-        outfiles_dic[out_id]["R1"].write( '+' + "\n")
-        outfiles_dic[out_id]["R2"].write( '+' + "\n")
+        outfiles_dic[read_id]["R1"].write( '+' + "\n")
+        outfiles_dic[read_id]["R2"].write( '+' + "\n")
 
-        outfiles_dic[out_id]["R1"].write( cur_r1_qual + "\n")
-        outfiles_dic[out_id]["R2"].write( cur_r1_qual + "\n")         
+        outfiles_dic[read_id]["R1"].write( cur_r1_qual + "\n")
+        outfiles_dic[read_id]["R2"].write( cur_r1_qual + "\n")         
 
 
     # close all files
