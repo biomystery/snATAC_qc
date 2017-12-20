@@ -34,7 +34,7 @@ def correct_single_barcode(b_in, b_lib):
 
 
 
-def correct_barcodes(r7,i7,i5,r5,fout_list):
+def correct_barcodes(r7,i7,i5,r5,barcode_dic,fout_list):
     """
     correct all the barcode for current read and determine which sample this read belongs to (fout)
     fout_list: a list of sample file object (s1_r1.fastq) 
@@ -48,11 +48,30 @@ def correct_barcodes(r7,i7,i5,r5,fout_list):
 def check_barcode(barcode_file):
     """
     check barcdes on the barcode file, if everything ok, return:
-    a nested dic d['sample1']['p1'] 
+     - a nested dic d['sample1']['p1'] 
+     - input: barcode_file 
+         - 1st col: set names (sample names)
+         - 2nd col: r7,i7,i5,r5 (set1) and repeated (use 8 Ns if exceeded max number of barcodes)
     """
-    barcode_dic = {}
     
-    return 
+    barcode_dic = {}
+    barcode_ord = ["r7","i7","i5","r5"]
+    
+    with open(barcode_file, "r") as fin:
+        samples = fin.readline().split() # first line define samples
+        l = [row.strip("\n").split("\t") for row in f.readlines()] # keep empty , and 2d list
+
+    barcode_len =[]
+    for s in samples:
+        barcode_dic[s] = {}
+        for ii,vi in enumerate(barcode_ord):
+            barcode_dic[s][vi] = filter(None,[r[ii] for r in l])
+            barcode_len.append(map(len,barcode_dic[s][vi]))
+
+    if [len(set(bl)) == 1 for bl in barcode_len].count(False) > 0:
+        sys.exit("barcode index has to be of the same length")
+
+    return barcode_dic
 
 def main():
     """ main function """

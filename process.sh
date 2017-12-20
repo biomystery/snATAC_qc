@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 
@@ -47,7 +48,14 @@ for l in ${l2_fastq[@]}; do echo $l; fastqc -t 2 -o $libqc_dir $l; done
 a=`zcat Undetermined_S0_L001_I1_001.fastq.gz | grep --color -E 'CTCTCTAT' |head -n1`
 echo ${#a} ; #43
 
-zcat Undetermined_S0_L001_I1_001.fastq.gz | grep --color CTCTCTAT | head # i5 in the end 
+zcat Undetermined_S0_L001_I1_001.fastq.gz | grep --color CTCTCTAT | head # i5 in the end
+
+# merge barcodes
+touch barcodes.txt
+printf "JYH_166\tJYH_165\n" > barcodes.txt
+
+paste p7_set1.txt i7_set1.txt i5_set1.txt p5_set1.txt p7_set2.txt i7_set2.txt i5_set2.txt p5_set2.txt >> barcodes.txt
+cat -A barcodes.txt
 
 
 
