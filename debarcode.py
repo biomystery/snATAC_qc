@@ -46,7 +46,12 @@ def correct_barcodes(r7,i7,i5,r5,fout_list):
     return r7_c, i7_c, i5_c, r5_c, fout  
 
 def check_barcode(barcode_file):
-    """check barcdes on the barcode file"""
+    """
+    check barcdes on the barcode file, if everything ok, return:
+    a nested dic d['sample1']['p1'] 
+    """
+    barcode_dic = {}
+    
     return 
 
 def main():
