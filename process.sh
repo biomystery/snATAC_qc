@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 
@@ -64,7 +63,7 @@ zcat  ~/scratch/seqdata/2017_12_06_ChIP_B/I1.fastq.gz  | head -n 40000 > ./test/
 
 python ./debarcode.py --i1 ./test/I1.fastq --i2 ./test/I2.fastq --r1 ./test/R1.fastq  --r2 ./test/R2.fastq --barcode ./barcodes/barcodes.txt 
 
-
+python ./debarcode.py --i1 ~/scratch/seqdata/2017_12_06_ChIP_B/I1.fastq.gz --i2 ~/scratch/seqdata/2017_12_06_ChIP_B/I2.fastq.gz --r1 ~/scratch/seqdata/2017_12_06_ChIP_B/R1.fastq.gz  --r2 ~/scratch/seqdata/2017_12_06_ChIP_B/R2.fastq.gz --barcode ./barcodes/barcodes.txt 
 
 
 
