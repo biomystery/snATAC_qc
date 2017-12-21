@@ -70,3 +70,11 @@ python ./debarcode.py --i1 ~/scratch/seqdata/2017_12_06_ChIP_B/I1.fastq.gz --i2 
 wc -l JYH_166_R1.fastq  #20676 JYH_166_R1.fastq
 wc  -l JYH_165_R1.fastq #2268 JYH_165_R1.fastq
 wc -l undetermined_R1.fastq #14056 undetermined_R1.fastq
+
+
+##################################################
+# add a cut file script 
+##################################################
+
+# cut each file into roughly equal file with lines that are 4 based
+
