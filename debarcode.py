@@ -105,26 +105,26 @@ def check_barcode(barcode_file):
 
 def check_input_file(input_f):
     """check input file and return file handle"""
-    if not os.path.isfile(input_f): exit("error: \'%s\' not exist" % fi1_name)
+    if not os.path.isfile(input_f): exit("error: \'%s\' not exist" % input_f)
 
     # check file type & open file
-    if fi1_name.endswith('.gz'):
-        fi1 = gzip.open(fi1_name, 'rb')
-    elif fi1_name.endswith('.bz2'):
-        fi1 = bz2.BZ2File(fi1_name, 'r')
-    elif fi1_name.endswith('.fastq'):
-        fi1 = open(fi1_name, 'r')
-    elif fi1_name.endswith('.fq'):
-        fi1 = open(fi1_name, 'r')
+    if input_f.endswith('.gz'):
+        fi1 = gzip.open(input_f, 'rb')
+    elif input_f.endswith('.bz2'):
+        fi1 = bz2.BZ2File(input_f, 'r')
+    elif input_f.endswith('.fastq'):
+        fi1 = open(input_f, 'r')
+    elif input_f.endswith('.fq'):
+        fi1 = open(input_f, 'r')
 
     return fi1
 
 def parse_fastq(f):
     """parse every 4 lines of fastq file opened with f handle"""
-    name = fi1.readline().strip()[1:]
-    read = fi1.readline().strip()
-    plus = fi1.readline().strip()
-    qual = fi1.readline().strip()
+    name = f.readline().strip()[1:]
+    read = f.readline().strip()
+    plus = f.readline().strip()
+    qual = f.readline().strip()
 
     return [name,read,plus,qual]
     
@@ -181,23 +181,23 @@ def main():
     infiles_dic = {k:check_input_file(v) for k,v in {"I1":args.I1,"I2":args.I2,"R1":args.R1,"R2":args.R2}.iteritems()}
 
     # open output files: nested dic 
-    outfiles_dic = {k: {"R1":open(k+"_R1.fastq" , "w"), "R2":open(k+"_R2.fastq","w")} for k in barcode_dic.keys()}
+    outfiles_dic = {k: {"R1":open(k+"_R1.fastq" , "w"), "R2":open(k+"_R2.fastq","w")} for k in barcode_lib_dic.keys()}
     outfiles_dic["unknown"]={"R1":open("undetermined_R1.fastq","w"),"R2":open("undetermined_R2.fastq","w")}
         
     while True:
 
-        cur_read = {k:parse_fastq(f)  for k,f in infiles_dic.iteritems()}
+        cur_read = {k:parse_fastq(f)  for k,f in infiles_dic.iteritems()} # key: I1, I2, R1, R2
 
         # check all read name 
         cur_read_name =set([v[0].split()[0] for k,v in cur_read.iteritems()])
         if "" in cur_read_name: break         
         if len(cur_read_name)>1: sys.exit("error(main): read name not matched")        
 
-        # get current barcode before correction 
-        cur_barcode_dic = {"r7":cur_i1_read[:8],"i7":cur_i1_read[-8:],"i5": cur_i2_read[:8],"r5": cur_i2_read[-8:]}
+        # get current barcode before correction
+        cur_barcode_lib_dic = {"r7":cur_read['I1'][1][:8],"i7":cur_read['I1'][1][-8:],"i5": cur_read['I2'][1][:8],"r5": cur_read['I2'][1][-8:]}
 
         # correct barcode & get sample id for this read  
-        cur_barcode_c,read_id = correct_barcodes(cur_barcode_dic,barcode_lib_dic)
+        cur_barcode_c,read_id = correct_barcodes(cur_barcode_lib_dic,barcode_lib_dic)
         
         # concorate barcodes
         cur_barcode = cur_barcode_c["r7"] + cur_barcode_c["i7"] + cur_barcode_c["i5"] +cur_barcode_c["r5"]

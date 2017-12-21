@@ -58,6 +58,9 @@ paste p7_set1.txt i7_set1.txt i5_set1.txt p5_set1.txt p7_set2.txt i7_set2.txt i5
 cat -A barcodes.txt
 
 
+python ./debarcode.py --i1 ./test/I1.fastq --i2 ./test/I2.fastq --r1 ./test/R1.fastq  --r2 ./test/R2.fastq --barcode ./barcodes/barcodes.txt 
+
+
 
 
 
