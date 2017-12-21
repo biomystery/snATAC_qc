@@ -35,7 +35,7 @@ def correct_single_barcode(b_in, key_in, b_lib,max_mm):
      # m,num_mm,m2,mum_mm2; for all samples, do a compare
     all_matches = {k:{'match':min_dist(b_in, v)} for k,v in b_lib.iteritems()} #k: sample, v: barcodes
     
-    for k,v in all_matches.iteritems():
+    for k,v in all_matches.iteritems(): # check if barcode in library
         #print v['match']
         all_matches[k]['is_found'] = (v['match'][1] <= max_mm and abs(v['match'][3] -v['match'][1]) > 1)
 
@@ -44,11 +44,16 @@ def correct_single_barcode(b_in, key_in, b_lib,max_mm):
         if match['is_found']:
             return  match['match'][0],"" # return corrected 
         else:
-            return b_in,"unknown" # not correct 
+            return b_in,"unknown" # not in library  
     else:  # need to find which sample  
         s_out  = [s for s,m in all_matches.iteritems() if m['is_found']]
-        if len(s_out) == 1 :
-            return all_matches[s_out]['match'][0],s_out
+        if len(s_out) >=1 :
+            all_dist = [all_matches[s]['match'][1] for s in s_out]
+            imin=[i for i,v in enumerate(all_dist) if v ==min(all_dist)]
+            if(len(imin)>1):
+                return b_in,"unknown"
+            else:
+                return all_matches[s_out[imin[0]]]['match'][0],s_out[imin[0]]
         else:
             return b_in,"unknown"
 
@@ -70,6 +75,7 @@ def correct_barcodes(input_barcode_dic_,barcode_lib_dic_,max_mm_):
         r_id_init.append(r_id)
 
     r_id = set(filter(None,r_id_init))
+    
     if len(r_id)>1 or ("unknown" in r_id):
         return corrected_barcode_dic, "unknown"
     else:
@@ -93,10 +99,12 @@ def check_barcode(barcode_file):
         l = [row.strip("\n").split("\t") for row in fin.readlines()] # keep empty , and 2d list
 
     barcode_len =[]
-    for s in samples:
+    iii =  xrange(0, len(l), 4) # 
+    
+    for i,s in enumerate(samples):
         barcode_dic[s] = {}
         for ii,vi in enumerate(barcode_ord):
-            barcode_dic[s][vi] = filter(None,[r[ii] for r in l])
+            barcode_dic[s][vi] = filter(None,[r[ii+iii[i]] for r in l])
             barcode_len.append(map(len,barcode_dic[s][vi]))
 
     if [len(set(bl)) == 1 for bl in barcode_len].count(False) > 0:

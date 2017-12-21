@@ -57,6 +57,10 @@ printf "JYH_166\tJYH_165\n" > barcodes.txt
 paste p7_set1.txt i7_set1.txt i5_set1.txt p5_set1.txt p7_set2.txt i7_set2.txt i5_set2.txt p5_set2.txt >> barcodes.txt
 cat -A barcodes.txt
 
+zcat  ~/scratch/seqdata/2017_12_06_ChIP_B/R1.fastq.gz  | head -n 40000 > ./test/R1.fastq
+zcat  ~/scratch/seqdata/2017_12_06_ChIP_B/R2.fastq.gz  | head -n 40000 > ./test/R2.fastq                      
+zcat  ~/scratch/seqdata/2017_12_06_ChIP_B/I2.fastq.gz  | head -n 40000 > ./test/I2.fastq                      
+zcat  ~/scratch/seqdata/2017_12_06_ChIP_B/I1.fastq.gz  | head -n 40000 > ./test/I1.fastq 
 
 python ./debarcode.py --i1 ./test/I1.fastq --i2 ./test/I2.fastq --r1 ./test/R1.fastq  --r2 ./test/R2.fastq --barcode ./barcodes/barcodes.txt 
 
@@ -64,3 +68,6 @@ python ./debarcode.py --i1 ./test/I1.fastq --i2 ./test/I2.fastq --r1 ./test/R1.f
 
 
 
+wc -l JYH_166_R1.fastq  #20676 JYH_166_R1.fastq
+wc  -l JYH_165_R1.fastq #2268 JYH_165_R1.fastq
+wc -l undetermined_R1.fastq #14056 undetermined_R1.fastq
