@@ -1,1 +1,4 @@
 *.fastq
+demultiplex_snATAC.e*
+demultiplex_snATAC.o* 
+*\#*
