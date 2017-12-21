@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # wrapper to run the script
-export PATH="$PATH:/home/zhc268/data/software/scATAC/scATAC/bin/"
+export PATH="$PATH:/home/zhc268/data/software/snATAC_qc/"
 #lanes_log="/home/zhc268/data/logs/run_20171221_demultiplex_snATAC.txt"
 lanes=(`cat $lanes_log`)
 
