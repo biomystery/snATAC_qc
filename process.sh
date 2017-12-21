@@ -78,3 +78,8 @@ wc -l undetermined_R1.fastq #14056 undetermined_R1.fastq
 
 # cut each file into roughly equal file with lines that are 4 based
 
+
+##################################################
+# qsub
+##################################################
+qsub -q condo -N demultiplex_snATAC -l nodes=1:ppn=1 -l walltime=08:00:00 -t 0-1 -v lanes_log="/home/zhc268/data/logs/run_20171221_demultiplex_snATAC.txt",fastqdir="/home/zhc268/scratch/seqdata/2017_12_06_ChIP_B/" ./run_wrapper.sh
