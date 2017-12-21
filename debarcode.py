@@ -36,7 +36,8 @@ def correct_single_barcode(b_in, key_in, b_lib,max_mm):
     all_matches = {k:{'match':min_dist(b_in, v)} for k,v in b_lib.iteritems()} #k: sample, v: barcodes
     
     for k,v in all_matches.iteritems():
-        all_matches[k]['is_found'] = (v['match'][1] <=max_mm and abs(v['match'][3] -v['match'][0]) > 1)
+        #print v['match']
+        all_matches[k]['is_found'] = (v['match'][1] <= max_mm and abs(v['match'][3] -v['match'][1]) > 1)
 
     if key_in in ['r5','r7']:
         match = all_matches[all_matches.keys()[0]] # just first sample 
@@ -45,7 +46,7 @@ def correct_single_barcode(b_in, key_in, b_lib,max_mm):
         else:
             return b_in,"unknown" # not correct 
     else:  # need to find which sample  
-        s_out  = [s for s,m in all_matches if m['is_found']]
+        s_out  = [s for s,m in all_matches.iteritems() if m['is_found']]
         if len(s_out) == 1 :
             return all_matches[s_out]['match'][0],s_out
         else:
@@ -53,7 +54,7 @@ def correct_single_barcode(b_in, key_in, b_lib,max_mm):
 
 
 
-def correct_barcodes(input_barcode_dic_,barcode_lib_dic_):
+def correct_barcodes(input_barcode_dic_,barcode_lib_dic_,max_mm_):
     """
     correct barcode & get sample id for this read  
     """
@@ -64,7 +65,7 @@ def correct_barcodes(input_barcode_dic_,barcode_lib_dic_):
         # k is : r7, i7, i5, r5 (order not sure)
         
         b_lib_sub = {s:v[k] for s,v in barcode_lib_dic_.iteritems()}
-        b_c, r_id_ = correct_single_barcode(b,k,b_lib_sub)
+        b_c, r_id = correct_single_barcode(b,k,b_lib_sub,max_mm_)
         corrected_barcode_dic[k] = b_c
         r_id_init.append(r_id)
 
@@ -188,7 +189,10 @@ def main():
 
         cur_read = {k:parse_fastq(f)  for k,f in infiles_dic.iteritems()} # key: I1, I2, R1, R2
 
-        # check all read name 
+        # check all read name
+
+        if "" in cur_read['I1']: break
+        
         cur_read_name =set([v[0].split()[0] for k,v in cur_read.iteritems()])
         if "" in cur_read_name: break         
         if len(cur_read_name)>1: sys.exit("error(main): read name not matched")        
@@ -197,7 +201,7 @@ def main():
         cur_barcode_lib_dic = {"r7":cur_read['I1'][1][:8],"i7":cur_read['I1'][1][-8:],"i5": cur_read['I2'][1][:8],"r5": cur_read['I2'][1][-8:]}
 
         # correct barcode & get sample id for this read  
-        cur_barcode_c,read_id = correct_barcodes(cur_barcode_lib_dic,barcode_lib_dic)
+        cur_barcode_c,read_id = correct_barcodes(cur_barcode_lib_dic,barcode_lib_dic,max_mm)
         
         # concorate barcodes
         cur_barcode = cur_barcode_c["r7"] + cur_barcode_c["i7"] + cur_barcode_c["i5"] +cur_barcode_c["r5"]
@@ -206,18 +210,18 @@ def main():
 
         # demultiplex r1 & r2 (split to sample1_R1.fastq.gz, sample2_R1.fastq.gz, undetermined_R1.fastq.gz, undetermined_R2.fastq.gz)
         # write to output files
-        outfiles_dic[read_id]["R1"].write('@' + cur_barcode + ':' + cur_r1_name +"\n")
-        outfiles_dic[read_id]["R2"].write('@' + cur_barcode + ':' + cur_r2_name +"\n")        
+        outfiles_dic[read_id]["R1"].write('@' + cur_barcode + ':' + cur_read['R1'][0] +"\n")
+        outfiles_dic[read_id]["R2"].write('@' + cur_barcode + ':' + cur_read['R2'][0] +"\n")
 
         
-        outfiles.dic[read_id]["R1"].write( cur_r1_read+ "\n")
-        outfiles_dic[read_id]["R2"].write( cur_r2_read+ "\n")
+        outfiles_dic[read_id]["R1"].write( cur_read["R1"][1] + "\n")
+        outfiles_dic[read_id]["R2"].write( cur_read["R2"][1] + "\n")
         
         outfiles_dic[read_id]["R1"].write( '+' + "\n")
         outfiles_dic[read_id]["R2"].write( '+' + "\n")
 
-        outfiles_dic[read_id]["R1"].write( cur_r1_qual + "\n")
-        outfiles_dic[read_id]["R2"].write( cur_r1_qual + "\n")         
+        outfiles_dic[read_id]["R1"].write( cur_read["R1"][3]+ "\n")
+        outfiles_dic[read_id]["R2"].write( cur_read["R2"][3]+ "\n")
 
 
     # close all files
