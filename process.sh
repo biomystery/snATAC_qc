@@ -83,3 +83,55 @@ wc -l undetermined_R1.fastq #14056 undetermined_R1.fastq
 # qsub
 ##################################################
 qsub -q condo -N demultiplex_snATAC -l nodes=1:ppn=1 -l walltime=08:00:00 -t 0-1 -v lanes_log="/home/zhc268/data/logs/run_20171221_demultiplex_snATAC.txt",fastqdir="/home/zhc268/scratch/seqdata/2017_12_06_ChIP_B/" ./run_wrapper.sh
+
+
+# reached walltime
+cd /home/zhc268/scratch/seqdata/2017_12_06_ChIP_B
+zcat /home/zhc268/scratch/seqdata/2017_12_06_ChIP_B/Undetermined_S0_L001_I1_001.fastq.gz | wc -l >l1_i1_lines.txt &
+zcat Undetermined_S0_L001_I2_001.fastq.gz | wc -l >l1_i2_lines.txt &
+zcat Undetermined_S0_L002_I2_001.fastq.gz | wc -l >l2_i2_lines.txt 
+find ./Undetermined_S0_L001 -name "*.fastq" | xargs -n1 -I {} echo  "cat {} |wc -l > {}_lines.txt &" | bash
+find ./Undetermined_S0_L002 -name "*.fastq" | xargs -n1 -I {} echo  "cat {} |wc -l > {}_lines.txt &" | bash
+find ./Undetermined_S0_L001/ -name "*.txt" -exec cat {} \; 
+find ./Undetermined_S0_L002/ -name "*.txt" -exec cat {} \; 
+cur_l1=`find ./Undetermined_S0_L001/ -name "*R1*.txt" -exec cat {} \; | awk '{s+=$1} END {print s}'`
+cur_l2=`find ./Undetermined_S0_L002/ -name "*R1*.txt" -exec cat {} \; | awk '{s+=$1} END {print s}'`
+
+l1_lines=`cat l1_i1_lines.txt`
+l2_lines=`cat l2_i2_lines.txt`
+
+remain_l1=`echo $(( $l1_lines - $cur_l1 ))`
+remain_l2=`echo $(( $l2_lines - $cur_l2 ))`
+
+# verify the read name
+zcat Undetermined_S0_L001_I1_001.fastq.gz |  head  -n ${cur_l1} | tail -n16 > cur_l1_i1.fastq & 
+zcat Undetermined_S0_L001_R1_001.fastq.gz |  head  -n ${cur_l1} | tail -n16 > cur_l1_r1.fastq &
+cur_l1_i1=(`cat cur_l1_i1.fastq`)
+cur_l1_r1=(`cat cur_l1_r1.fastq`)
+# 7001113:856:HVVNVBCXY:1:2107:11894:81333 1:N:0:0
+# @7001113:856:HVVNVBCXY:1:2107:11918:81350 1:N:0:0
+
+echo  $cur_l1_r1 
+cur_s1_r1=(`tail -n5  ./Undetermined_S0_L001/JYH_165_R1.fastq`)
+tail -n1 ./Undetermined_S0_L001/JYH_165_R1.fastq
+#7001113:856:HVVNVBCXY:1:2107:10260:79049 1:N:0:0
+#@TAATGCGCGAACGGTATCCGGTAAGGCTCTGA:7001113:856:HVVNVBCXY
+
+echo  $cur_s1_r1 | cut -d":" -f 2-
+cur_s2_r1=(`tail -n5  ./Undetermined_S0_L001/JYH_166_R1.fastq`)
+#7001113:856:HVVNVBCXY:1:2107:18126:81934 1:N:0:0
+#@ATTCAGAAC
+
+echo  $cur_s2_r1 | cut -d":" -f 2-                                                                                   
+cur_u_r1=(`tail -n5  ./Undetermined_S0_L001/undetermined_R1.fastq`)
+#7001113:856:HVVNVBCXY:1:2107:10131:81453 1:N:0:0
+#@ATTACTCGGTT
+echo  $cur_u_r1 | cut -d":" -f 2-                                                                                    
+
+echo ${cur_s1_r1[@]}
+
+
+##################################################
+# need check the results
+##################################################
+
