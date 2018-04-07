@@ -82,20 +82,20 @@ def correct_barcodes(input_barcode_dic_,barcode_lib_dic_,max_mm_):
         return corrected_barcode_dic, list(r_id)[0]
 
 
-def check_barcode(barcode_file):
+def check_barcode(barcode_file,samples):
     """
     check barcdes on the barcode file, if everything ok, return:
      - a nested dic d['sample1']['p1'] 
-     - input: barcode_file 
-         - 1st col: set names (sample names)
-         - 2nd col: r7,i7,i5,r5 (set1) and repeated (use 8 Ns if exceeded max number of barcodes)
+     - input:
+         barcode_file 
+         - : r7,i7,i5,r5 (set1) and repeated (use 8 Ns if exceeded max number of barcodes)
+         samples: from -s1 and -s2
     """
     
     barcode_dic = {}
     barcode_ord = ["r7","i7","i5","r5"]
     
     with open(barcode_file, "r") as fin:
-        samples = fin.readline().split() # first line define samples
         l = [row.strip("\n").split("\t") for row in fin.readlines()] # keep empty , and 2d list
 
     barcode_len =[]
@@ -162,6 +162,16 @@ def main():
                       help='R2.fastq.gz'
                       )
 
+    parser.add_option('-m','--s1',
+                      dest='S1',
+                      help='Sample 1 using barcode set1'
+                      )
+
+    parser.add_option('-n','--s2',
+                      dest='S2',
+                      help='Sample 2 using barcode set2'
+                      )
+
     parser.add_option('-x','--xmismatch',
                       dest="xmismatch",
                       default = 2,
@@ -188,9 +198,10 @@ def main():
     args = parser.parse_args()[0]
     max_mm = int(args.xmismatch)
     out_dir = args.outdir
+    samples=[args.S1, args.S2]
     
     # check barcode list
-    barcode_lib_dic = check_barcode(args.barcodes)
+    barcode_lib_dic = check_barcode(args.barcodes,samples)
     
     # open input files; regular dic
     infiles_dic = {k:check_input_file(v) for k,v in {"I1":args.I1,"I2":args.I2,"R1":args.R1,"R2":args.R2}.iteritems()}
