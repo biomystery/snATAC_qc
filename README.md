@@ -26,6 +26,5 @@ Options:
   -o OUTDIR, --outdir=OUTDIR
                         output dir.
   --version=VERSION     
-(
 ```
 

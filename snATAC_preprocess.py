@@ -166,7 +166,7 @@ def main():
                       dest="xmismatch",
                       default = 2,
                       type=int,
-                      help='max allowed mismatch.'
+                      help='max allowed mismatch (default 2).'
                       )
 
     parser.add_option('-l','--barcode',
