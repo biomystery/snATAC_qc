@@ -1,6 +1,6 @@
 snATAC_preprocess: 
 ============================================================
-A tool for demultiplex and encode barcode for snATAC. 
+A tool for demultiplex snATAC into samples and id nuclei by combining barcodes. 
 
 # Usage 
 
@@ -51,7 +51,7 @@ PCR after FACS Positions for the barcodes are: `p/r7 i7 i5 p/r5`.
 In each seq run, two samples are mixed and they are multiplexed by two sets of barcodes. Usually, we use the same Tn5 but different PCR barcodes for Sample A and B. So: 
 
 - Same: `p/r7` and `p/r5`
-- Diff: `i7` (for `R2`)  and `i5` (for `R1`) 
+- Diff: `i7` (for `R1` reads)  and `i5` (for `R2` reads) 
 
 So in snATAC preprocessing, the total fastqs will have two levels demultiplexing: 
 
