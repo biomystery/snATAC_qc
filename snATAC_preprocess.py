@@ -207,8 +207,8 @@ def main():
     infiles_dic = {k:check_input_file(v) for k,v in {"I1":args.I1,"I2":args.I2,"R1":args.R1,"R2":args.R2}.iteritems()}
 
     # open output files: nested dic 
-    outfiles_dic = {k: {"R1":open(out_dir +"/" + k +"_R1.fastq" , "w"), "R2":open(out_dir+"/" + k +"_R2.fastq","w")} for k in barcode_lib_dic.keys()}
-    outfiles_dic["unknown"]={"R1":open(out_dir+"/"+ "undetermined_R1.fastq","w"),"R2":open(out_dir +"/"+ "undetermined_R2.fastq","w")}
+    outfiles_dic = {k: {"R1":gzip.open(out_dir +"/" + k +"_R1.fastq.gz" , "wb"), "R2":gzip.open(out_dir+"/" + k +"_R2.fastq.gz","wb")} for k in barcode_lib_dic.keys()}
+    outfiles_dic["unknown"]={"R1":gzip.open(out_dir+"/"+ "undetermined_R1.fastq.gz","wb"),"R2":gzip.open(out_dir +"/"+ "undetermined_R2.fastq.gz","wb")}
         
     while True:
 
@@ -251,7 +251,7 @@ def main():
 
     # close all files
     for f in infiles_dic.values(): f.close();
-    for f in outfiles_dic.values(): f["R1"].close(); f["R2"].close()
+    for f in outfiles_dic.values(): f["R1"].close(); f["R2"].close();
     
 if __name__ == '__main__':
     main()
