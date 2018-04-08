@@ -2,4 +2,5 @@
 demultiplex_snATAC.e*
 demultiplex_snATAC.o* 
 *\#*
+*/._*
 .*DS_Store
