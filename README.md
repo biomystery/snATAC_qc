@@ -30,5 +30,18 @@ Options:
   --version=VERSION     
 ```
 
-# Input 
-## A single barcode file
+# Two rounds of multiplexing
+
+Libraries are sequenced paired end. Each sequencing read is assigned to 4 barcodes on 2 Index reads.
+The index reads are `43 (Index 1)` and `37 (Index 2)` reads long. 
+
+Two rounds: 
+1. During tagmentation (Tn5 treatment) `p/r` barcodes are integrated
+2. During PCR, `i` barcodes are integrated 
+
+PCR after FACS Positions for the barcodes are: p/r7 i7 i5 p/r5
+- p/r7 1-8 (Index read 1)
+- i7 36-43 (Index read 1)
+- i5 1-8 (Index read 2)
+- p/r5 30-37 (Index read 2)
+
