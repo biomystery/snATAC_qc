@@ -30,7 +30,7 @@ Options:
   --version=VERSION     
 ```
 
-# Two rounds of multiplexing
+# Two rounds of multiplexing in snATAC-seq
 
 Libraries are sequenced paired end. Each sequencing read is assigned to 4 barcodes on 2 Index reads.
 The index reads are `43 (Index 1)` and `37 (Index 2)` reads long. 
@@ -39,9 +39,23 @@ Two rounds:
 1. During tagmentation (Tn5 treatment) `p/r` barcodes are integrated
 2. During PCR, `i` barcodes are integrated 
 
-PCR after FACS Positions for the barcodes are: p/r7 i7 i5 p/r5
-- p/r7 1-8 (Index read 1)
-- i7 36-43 (Index read 1)
-- i5 1-8 (Index read 2)
-- p/r5 30-37 (Index read 2)
+PCR after FACS Positions for the barcodes are: `p/r7 i7 i5 p/r5`. 
+- `p/r7` 1-8 (Index read 1 or I1)
+- `i7` 36-43 (Index read 1 or I1)
+- `i5` 1-8 (Index read 2 or I2)
+- `p/r5` 30-37 (Index read I2)
 
+
+# Two sample per seq run 
+
+In each seq run, two samples are mixed and they are multiplexed by two sets of barcodes. Usually, we use the same Tn5 but different PCR barcodes for Sample A and B. So: 
+
+- Same: `p/r7` and `p/r5`
+- Diff: `i7` (for `R2`)  and `i5` (for `R1`) 
+
+So in snATAC preprocessing, the total fastqs will have two levels demultiplexing: 
+
+1. demultiplex to Sample A and Sample B
+2. demultiplex to individual cell/nucleus 
+
+By default, our script will demultiplex each seq run to level 2 (single nuleus level for each sample).
