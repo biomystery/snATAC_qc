@@ -30,6 +30,12 @@ Options:
   --version=VERSION     
 ```
 
+## Test 
+
+```
+ ./snATAC_preprocess.py  -a ./test/I1.fastq.gz -b ./test/I2.fastq.gz -c ./test/R1.fastq.gz -d ./test/R2.fastq.gz -m A -n B -l ./barcodes/barcodes.txt -o ./test/
+```
+
 # Two rounds of multiplexing in snATAC-seq
 
 Libraries are sequenced paired end. Each sequencing read is assigned to 4 barcodes on 2 Index reads.
