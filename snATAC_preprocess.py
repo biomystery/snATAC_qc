@@ -44,7 +44,7 @@ def correct_single_barcode(b_in, key_in, b_lib,max_mm):
         if match['is_found']:
             return  match['match'][0],"" # return corrected 
         else:
-            return b_in,"unknown" # not in library  
+            return b_in,"" # not in library  
     else:  # need to find which sample  
         s_out  = [s for s,m in all_matches.iteritems() if m['is_found']]
         if len(s_out) >=1 :
