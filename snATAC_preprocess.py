@@ -231,7 +231,7 @@ def main():
         # concorate barcodes
         cur_barcode = cur_barcode_c["r7"] + cur_barcode_c["i7"] + cur_barcode_c["i5"] +cur_barcode_c["r5"]
 
-        if cur_barcode.count('N') >= 12: read_id="unknown" 
+        #if cur_barcode.count('N') >= 12: read_id="unknown" 
 
         # demultiplex r1 & r2 (split to sample1_R1.fastq.gz, sample2_R1.fastq.gz, undetermined_R1.fastq.gz, undetermined_R2.fastq.gz)
         # write to output files
